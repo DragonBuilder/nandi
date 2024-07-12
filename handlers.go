@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"net/http"
 	"text/template"
 )
@@ -12,10 +11,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("error fetching file man"))
 	}
 
-	var op bytes.Buffer
-	if err := tmpl.Execute(&op, nil); err != nil {
+	// var op bytes.Buffer
+	if err := tmpl.Execute(w, nil); err != nil {
 		w.Write([]byte("error executing file man"))
 	}
 
-	w.Write(op.Bytes())
+	// w.Write(op.Bytes())
 }
