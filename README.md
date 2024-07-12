@@ -4,7 +4,7 @@ Authentication Server
 
 ## Goal
 
-Be a single source of authentication for products and services within an organisation.
+Learn authentication strategies.
 
 ## Roadmap to v1.0
 
