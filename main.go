@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/go-chi/render"
 	"github.com/gorilla/mux"
 )
 
@@ -17,20 +16,15 @@ func main() {
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("assets/"))))
 
-	r.HandleFunc("/", HomeHandler)
+	r.HandleFunc("/", HomeHandler).Methods("GET")
+
+	r.HandleFunc("/api/user/sign-up", SignUpHandler).Methods("POST")
 
 	port := EnvVar(ENV_PORT)
 
 	slog.Info(fmt.Sprintf("starting http server on port :%s", port))
 
 	http.ListenAndServe(fmt.Sprintf(":%s", port), r)
-}
-
-type UserSignUp struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirm_password"`
 }
 
 type User struct {
@@ -40,8 +34,7 @@ type User struct {
 }
 
 type ErrorResponse struct {
-	Slug       string `json:"slug"`
-	httpStatus int
+	Error string `json:"error"`
 }
 
 // func (e ErrorResponse) Render(w http.ResponseWriter, _ *http.Request) error {
@@ -50,7 +43,6 @@ type ErrorResponse struct {
 // }
 
 func ping(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, map[string]string{"message": "pong"})
 }
 
 // func SignUp(w http.ResponseWriter, r *http.Request) {
