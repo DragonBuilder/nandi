@@ -45,14 +45,20 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(strings.TrimSpace(signUp.Email)) == 0 {
+	signUp = UserSignUp{
+		Email:           strings.TrimSpace(signUp.Email),
+		Password:        strings.TrimSpace(signUp.Password),
+		ConfirmPassword: strings.TrimSpace(signUp.ConfirmPassword),
+	}
+
+	if len(signUp.Email) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ErrorResponse{Error: "Email not provided"})
 		slog.Error(fmt.Sprintf("Email not provided : %v", err))
 		return
 	}
 
-	if len(strings.TrimSpace(signUp.Password)) == 0 || len(strings.TrimSpace(signUp.ConfirmPassword)) == 0 {
+	if len(signUp.Password) == 0 || len(signUp.ConfirmPassword) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ErrorResponse{Error: "Provide password and the confirm password. Both should be same."})
 		slog.Error(fmt.Sprintf("Email not provided : %v", err))
