@@ -117,3 +117,58 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(map[string]string{"Message": fmt.Sprintf("Registered user %s", signUp.Email)})
 }
+
+type Login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		resp := Response{
+			StatusCode: http.StatusBadRequest,
+			Status:     http.StatusText(http.StatusBadRequest),
+			Error:      "error reading body",
+		}
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(fmt.Sprintf("%s : %v", resp.Error, err))
+		return
+	}
+
+	var login Login
+	if err := json.Unmarshal(body, &login); err != nil {
+		resp := errorResponse(http.StatusBadRequest, "error bad type")
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(fmt.Sprintf("%s : %v", resp.Error, err))
+		return
+	}
+
+	login = Login{
+		Email:    strings.TrimSpace(login.Email),
+		Password: strings.TrimSpace(login.Password),
+	}
+
+	json.NewEncoder(w).Encode(success("login successful"))
+
+}
+
+func errorResponse(code int, err string) Response {
+	return Response{
+		StatusCode: code,
+		Status:     http.StatusText(code),
+		Error:      err,
+	}
+}
+
+func success(msg string) Response {
+	return Response{
+		StatusCode: http.StatusOK,
+		Status:     http.StatusText(http.StatusOK),
+		Message:    msg,
+	}
+}

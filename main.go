@@ -20,6 +20,7 @@ func main() {
 	r.HandleFunc("/", HomeHandler).Methods("GET")
 
 	r.HandleFunc("/api/user/sign-up", SignUpHandler).Methods("POST")
+	r.HandleFunc("/api/user/login", LoginHandler).Methods("POST")
 
 	port := EnvVar(ENV_PORT)
 
@@ -34,6 +35,13 @@ func main() {
 
 type ErrorResponse struct {
 	Error string `json:"error"`
+}
+
+type Response struct {
+	StatusCode int    `json:"status_code"`
+	Status     string `json:"status"`
+	Error      string `json:"error,omitempty"`
+	Message    string `json:"message,omitempty"`
 }
 
 func EnvVar(name string) string {
