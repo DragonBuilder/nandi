@@ -43,9 +43,9 @@ A HTTP `POST` endpoint `/api/user/sign-up` is created for anyone to start signin
 
 A handler `SignUpHandler` is defined in [handlers.go](handlers.go) to handle the requests on this endpoint. 
 
-The `SignUpHandler` expects the request body to be a JSON and conforming to the type `SignUp` as defined in [handlers.go](handlers.go).
+The `SignUpHandler` expects the request body to be a JSON and conforming to the type `UserSignUp` as defined in [handlers.go](handlers.go).
 
-One the body is decoded into an instance of `SignUp`, some basic validations such as making sure none of the fields are empty and such. 
+One the body is decoded into an instance of `UserSignUp`, some basic validations such as making sure none of the fields are empty and such. 
 
 Then we generate the hash of the `Password` field and also compare it with value at `ConfirmPassword` field. This is to ensure that the user didn't accidently make a typo while entering the password. 
 
