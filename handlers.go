@@ -128,11 +128,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		resp := Response{
-			StatusCode: http.StatusBadRequest,
-			Status:     http.StatusText(http.StatusBadRequest),
-			Error:      "error reading body",
-		}
+		resp := errorResponse(http.StatusBadRequest, "error reading body")
 		w.WriteHeader(resp.StatusCode)
 		json.NewEncoder(w).Encode(resp)
 		slog.Error(fmt.Sprintf("%s : %v", resp.Error, err))
@@ -141,7 +137,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var login Login
 	if err := json.Unmarshal(body, &login); err != nil {
-		resp := errorResponse(http.StatusBadRequest, "error bad type")
+		var resp = errorResponse(http.StatusBadRequest, "error bad type")
 		w.WriteHeader(resp.StatusCode)
 		json.NewEncoder(w).Encode(resp)
 		slog.Error(fmt.Sprintf("%s : %v", resp.Error, err))
@@ -153,22 +149,26 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Password: strings.TrimSpace(login.Password),
 	}
 
+	fetch := `
+SELECT email FROM users WHERE email=?
+`
+	rows, err := db.Query(fetch, login.Email)
+	if err != nil {
+		var resp = errorResponse(http.StatusBadRequest, fmt.Sprintf("unknown user : %s", login.Email))
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(fmt.Sprintf("%s : %v", resp.Error, err))
+		return
+	}
+
+	if !rows.Next() {
+		var resp = errorResponse(http.StatusInternalServerError, fmt.Sprintf("unknown user : %s", login.Email))
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
 	json.NewEncoder(w).Encode(success("login successful"))
 
-}
-
-func errorResponse(code int, err string) Response {
-	return Response{
-		StatusCode: code,
-		Status:     http.StatusText(code),
-		Error:      err,
-	}
-}
-
-func success(msg string) Response {
-	return Response{
-		StatusCode: http.StatusOK,
-		Status:     http.StatusText(http.StatusOK),
-		Message:    msg,
-	}
 }

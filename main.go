@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -11,6 +12,8 @@ import (
 )
 
 var ENV_PORT = "PORT"
+
+var db *sql.DB
 
 func main() {
 	r := mux.NewRouter()
@@ -30,7 +33,18 @@ func main() {
 		panic(fmt.Errorf("error creating the **db** dir : %v", err))
 	}
 
+	var err error
+
+	db, err = sql.Open("sqlite3", "db/nandi.db")
+	if err != nil {
+		panic(fmt.Errorf("couldn't connect to db : %v", err))
+	}
+	defer db.Close()
+
 	http.ListenAndServe(fmt.Sprintf(":%s", port), r)
+}
+func EnvVar(name string) string {
+	return os.Getenv(name)
 }
 
 type ErrorResponse struct {
@@ -44,6 +58,18 @@ type Response struct {
 	Message    string `json:"message,omitempty"`
 }
 
-func EnvVar(name string) string {
-	return os.Getenv(name)
+func errorResponse(code int, err string) Response {
+	return Response{
+		StatusCode: code,
+		Status:     http.StatusText(code),
+		Error:      err,
+	}
+}
+
+func success(msg string) Response {
+	return Response{
+		StatusCode: http.StatusOK,
+		Status:     http.StatusText(http.StatusOK),
+		Message:    msg,
+	}
 }
