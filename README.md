@@ -49,7 +49,7 @@ Once the body is decoded into an instance of `UserSignUp`, some basic validation
 
 Then we generate the hash of the `Password` field and also compare it with value at `ConfirmPassword` field. This is to ensure that the user didn't accidently make a typo while entering the password. 
 
-The details are then stored in the `users` table. We store the `email` and the `password` with `created_at` and `updated_at` because why not? The important thing to note here that we **don't store the password in it plain text** format instead we **store the hashed value of the password**. This is generally considered a good practice. I think there might be couple of reasons for it. 
+The details are then stored in the `users` table. We store the `email` and the `password` with `created_at` and `updated_at` because why not? The important thing to note here that we **don't store the password as plain text** format instead we **store the hashed value of the password**. This is generally considered a good practice. I think there might be couple of reasons for it. 
 
 1. In case of a data breach, the passwords are not automatically compromised.
 2. The organisation themselves aren't aware of the actual password.
