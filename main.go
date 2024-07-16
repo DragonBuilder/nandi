@@ -9,11 +9,14 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
 var ENV_PORT = "PORT"
 
 var db *sql.DB
+
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
 func main() {
 	r := mux.NewRouter()

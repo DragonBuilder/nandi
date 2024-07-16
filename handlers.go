@@ -11,6 +11,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/gorilla/sessions"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -180,6 +181,30 @@ SELECT password FROM users WHERE email=?
 
 	if err := bcrypt.CompareHashAndPassword([]byte(pwd), []byte(login.Password)); err != nil {
 		var resp = errorResponse(http.StatusBadRequest, "bad credentials")
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
+	session, err := store.Get(r, "session")
+	if err != nil {
+		var resp = errorResponse(http.StatusBadRequest, "session fetch failed")
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
+	session.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
+
+	session.Values["user"] = login.Email
+	if err := session.Save(r, w); err != nil {
+		var resp = errorResponse(http.StatusBadRequest, "session updation failed")
 		w.WriteHeader(resp.StatusCode)
 		json.NewEncoder(w).Encode(resp)
 		slog.Error(resp.Error)
