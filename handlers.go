@@ -214,3 +214,27 @@ SELECT password FROM users WHERE email=?
 	json.NewEncoder(w).Encode(success("login successful"))
 
 }
+
+func RevealSecretHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "session")
+	if err != nil {
+		var resp = errorResponse(http.StatusForbidden, "no session found")
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
+	iUser, ok := session.Values["user"]
+	if !ok {
+		var resp = errorResponse(http.StatusForbidden, "no user found")
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
+	user := iUser.(string)
+
+	json.NewEncoder(w).Encode(success(fmt.Sprintf("Hi %s, here lies el dorado.", user)))
+}
