@@ -10,7 +10,7 @@ Web apps are incredibly powerful. Such products needn't be installed locally and
 
 Since web apps are hosted on the internet they are generally accessible by anyone with an internet connection. The need to identify users and authenticate users is very important so as to avoid unauthorized access and also to tailor custom experiences. Think x.com feeding you tweets from the accounts you follow and not a general feed or Netflix recommending movies based on your preferences. 
 
-So how do we trust the users to tell us who they are? Well that's where authentication & authorisation can help. This repository is a experimentation to explore various strategies for the same.
+So how do we trust the users to tell us who they are? Well that's where authentication & authorisation can help. This repository is an experimentation to explore various strategies for the same.
 
 ## Dependencies
 
