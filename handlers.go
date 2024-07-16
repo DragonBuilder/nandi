@@ -187,7 +187,7 @@ SELECT password FROM users WHERE email=?
 		return
 	}
 
-	session, err := store.Get(r, "session")
+	session, err := store.Get(r, "auth")
 	if err != nil {
 		var resp = errorResponse(http.StatusBadRequest, "session fetch failed")
 		w.WriteHeader(resp.StatusCode)
@@ -216,7 +216,7 @@ SELECT password FROM users WHERE email=?
 }
 
 func RevealSecretHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "session")
+	session, err := store.Get(r, "auth")
 	if err != nil {
 		var resp = errorResponse(http.StatusUnauthorized, "no session found")
 		w.WriteHeader(resp.StatusCode)
@@ -239,7 +239,7 @@ func RevealSecretHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "session")
+	session, err := store.Get(r, "auth")
 	if err != nil {
 		var resp = errorResponse(http.StatusInternalServerError, "no session found")
 		w.WriteHeader(resp.StatusCode)
