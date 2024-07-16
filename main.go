@@ -24,10 +24,12 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("assets/"))))
 
 	r.HandleFunc("/", HomeHandler).Methods("GET")
+
 	r.HandleFunc("/api/secret", RevealSecretHandler).Methods("GET")
 
 	r.HandleFunc("/api/user/sign-up", SignUpHandler).Methods("POST")
 	r.HandleFunc("/api/user/login", LoginHandler).Methods("POST")
+	r.HandleFunc("/api/user/logout", LogoutHandler).Methods("GET")
 
 	port := EnvVar(ENV_PORT)
 

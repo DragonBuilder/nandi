@@ -218,7 +218,7 @@ SELECT password FROM users WHERE email=?
 func RevealSecretHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
-		var resp = errorResponse(http.StatusForbidden, "no session found")
+		var resp = errorResponse(http.StatusUnauthorized, "no session found")
 		w.WriteHeader(resp.StatusCode)
 		json.NewEncoder(w).Encode(resp)
 		slog.Error(resp.Error)
@@ -227,7 +227,7 @@ func RevealSecretHandler(w http.ResponseWriter, r *http.Request) {
 
 	iUser, ok := session.Values["user"]
 	if !ok {
-		var resp = errorResponse(http.StatusForbidden, "no user found")
+		var resp = errorResponse(http.StatusUnauthorized, "no user found")
 		w.WriteHeader(resp.StatusCode)
 		json.NewEncoder(w).Encode(resp)
 		slog.Error(resp.Error)
@@ -235,6 +235,34 @@ func RevealSecretHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := iUser.(string)
-
 	json.NewEncoder(w).Encode(success(fmt.Sprintf("Hi %s, here lies el dorado.", user)))
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "session")
+	if err != nil {
+		var resp = errorResponse(http.StatusInternalServerError, "no session found")
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
+	iUser, ok := session.Values["user"]
+	if !ok {
+		var resp = errorResponse(http.StatusOK, "no user found")
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
+	user := iUser.(string)
+	delete(session.Values, "user")
+
+	if err := session.Save(r, w); err != nil {
+		panic(fmt.Errorf("session save failed : %v", err))
+	}
+
+	json.NewEncoder(w).Encode(success(fmt.Sprintf("%s logged out", user)))
 }
