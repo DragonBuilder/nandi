@@ -150,7 +150,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fetch := `
-SELECT email FROM users WHERE email=?
+SELECT password FROM users WHERE email=?
 `
 	rows, err := db.Query(fetch, login.Email)
 	if err != nil {
@@ -162,7 +162,24 @@ SELECT email FROM users WHERE email=?
 	}
 
 	if !rows.Next() {
-		var resp = errorResponse(http.StatusInternalServerError, fmt.Sprintf("unknown user : %s", login.Email))
+		var resp = errorResponse(http.StatusBadRequest, fmt.Sprintf("unknown user : %s", login.Email))
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
+	var pwd string
+	if err := rows.Scan(&pwd); err != nil {
+		var resp = errorResponse(http.StatusInternalServerError, "couldn't verify password")
+		w.WriteHeader(resp.StatusCode)
+		json.NewEncoder(w).Encode(resp)
+		slog.Error(resp.Error)
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(pwd), []byte(login.Password)); err != nil {
+		var resp = errorResponse(http.StatusBadRequest, "bad credentials")
 		w.WriteHeader(resp.StatusCode)
 		json.NewEncoder(w).Encode(resp)
 		slog.Error(resp.Error)
