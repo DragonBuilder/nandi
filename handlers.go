@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,7 +9,9 @@ import (
 	"net/http"
 	"strings"
 	"text/template"
+	"time"
 
+	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -76,6 +79,39 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ErrorResponse{Error: "Password mismatch. Make sure password & confirm password are same."})
 		slog.Error(fmt.Sprintf("Error password mismatch : %v", err))
+		return
+	}
+
+	db, err := sql.Open("sqlite3", "db/nandi.db")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "Error"})
+		slog.Error(fmt.Sprintf("Error opening connection to db : %v", err))
+		return
+	}
+	defer db.Close()
+
+	const create = `
+  CREATE TABLE IF NOT EXISTS users (
+  id INTEGER NOT NULL PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
+  );`
+
+	if _, err := db.Exec(create); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "Error"})
+		slog.Error(fmt.Sprintf("Error creating users table : %v", err))
+		return
+	}
+
+	now := time.Now()
+	if _, err := db.Exec("INSERT INTO users VALUES(NULL, ?, ?, ?, ?)", signUp.Email, string(hPwd), now, now); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "Error"})
+		slog.Error(fmt.Sprintf("Error inserting users table : %v", err))
 		return
 	}
 

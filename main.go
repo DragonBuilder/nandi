@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -23,6 +24,10 @@ func main() {
 	port := EnvVar(ENV_PORT)
 
 	slog.Info(fmt.Sprintf("starting http server on port :%s", port))
+
+	if err := os.Mkdir("db", os.ModePerm); err != nil && !errors.Is(err, os.ErrExist) {
+		panic(fmt.Errorf("error creating the **db** dir : %v", err))
+	}
 
 	http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 }
