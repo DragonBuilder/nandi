@@ -6,7 +6,7 @@ Authentication Server
 
 Learn authentication strategies. 
 
-Web apps are incredibly powerful. Such products needn't be installed locally and hence aren't generally constrained by the capabilities of the client machines. 
+Web apps are incredibly powerful. Such products needn't be installed locally and hence aren't generally constrained by the capabilities of the client machines. Also updating apps wouldn't require much more than simply refreshing the page by the client.  
 
 Since web apps are hosted on the internet they are generally accessible by anyone with an internet connection. The need to identify users and authenticate users is very important so as to avoid unauthorized access and also to tailor custom experiences. Think x.com feeding you tweets from the accounts you follow and not a general feed or Netflix recommending movies based on your preferences. 
 
@@ -56,13 +56,13 @@ The details are then stored in the `users` table. We store the `email` and the `
 
 Now the user should be able to login.
 
-## Login
+### Login
 TODO
 
-## Logout
+### Logout
 TODO
 
-## Reveal Secret URL
+### Reveal Secret URL
 TODO
 
 ## Roadmap
